@@ -1,0 +1,78 @@
+generate a complete code for a website with following functions and description :
+
+**Overview:**
+
+“Find a Mate” is a platform designed specifically to help people find ideal roommates and shared accommodations — just like Magicbricks helps people find properties. Unlike existing real estate platforms that focus primarily on renting entire houses or apartments, *Find a Mate* zeroes in on the roommate market: people looking to share an apartment or rent a single room, and people who already have space and want to share it.
+
+---
+
+### 🔍 **Core Purpose:**
+
+To match roommates based on living preferences, habits, lifestyle, and personality — not just budget and location.
+
+step 1 : generate a basic frame of the project based on the languages : React Node MySQL for the entire application
+step 2 : generate the frontend in react js. the frontend should have basic functionalities of :
+	### 🧩 **Key Features:**
+
+#### 1. **Dual Profile System**
+
+Two types of user profiles:
+
+* **Room Seekers:** Looking for a room or shared space.
+* **Room Owners:** Already have a place and are seeking a compatible roommate.
+
+Each user sets up a detailed profile outlining:
+
+* Budget
+* Preferred locations
+* Lifestyle choices (early bird vs night owl, vegetarian/non-veg, smoking/drinking habits, cleanliness level, guests allowed or not)
+* Profession & work schedule (remote, hybrid, night shift, etc.)
+* Gender preferences or comfort zones (if any)
+* Duration of stay (short-term/long-term)
+* Age bracket
+
+---
+
+#### 2. **Advanced Filters & Matchmaking**
+
+Instead of a simple “search by city” model, *Find a Mate* lets users apply deep lifestyle-based filters. Think:
+
+* "I'm a remote worker who prefers quiet mornings and no pets."
+* "I’m a student looking to share with someone who doesn’t smoke and is okay with guests."
+
+A **compatibility score** helps match users — like Tinder/Bumble but for roommates, based on profile overlap.
+
+---
+
+#### 3. **Room Listings with Personality Tags**
+
+Every listing isn’t just about location and rent. Listings include:
+
+* Photos/videos of the room and common areas
+* Roommate profiles (short bio, habits, schedules)
+* Vibes of the home (calm, social, minimalist, party-friendly, etc.)
+* Commute convenience (metro nearby, close to IT parks/universities)
+
+---
+
+#### 4. **In-App Chat & Scheduling**
+
+* Secure messaging to connect interested roommates
+* Video call scheduling (for virtual room tours or getting to know each other)
+* Built-in calendar to schedule visits or interviews
+
+---
+
+#### 5. **Trust & Safety**
+
+* KYC verification
+* Ratings/reviews from previous roommates
+* Fraud detection to prevent fake listings
+* Optional background checks
+
+
+
+step 3 : the data collected from step 2 should be arranged, sorted properly and should be accessible to me(all the data discussed to be collected here). the data should be accessible to the admin(me) only in a readable file.
+step 4 : the website should run smoothly and should be deployable on platforms like vercel. develop the code keeping in check with the errors, any file urls, any directories and dependencies required for the website.
+step 5 : the final output should be editable if required and should be flexible accordingly. i should be able to modify this code according to the functions and appearance.
+step 6 : guide me through the complete process with details of hosting, maintaining and editing the final output.
