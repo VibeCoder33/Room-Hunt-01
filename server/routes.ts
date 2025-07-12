@@ -3,21 +3,23 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { 
+import {
   insertUserProfileSchema,
   insertRoomListingSchema,
   insertMessageSchema,
   insertMatchSchema,
-  insertFavoriteSchema 
+  insertFavoriteSchema,
 } from "@shared/schema";
 import { calculateCompatibilityScore } from "../shared/compatibility";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  // if (process.env.REPL_ID) {
+  //   await setupAuth(app);
+  // }
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -30,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile routes
-  app.get('/api/profile', isAuthenticated, async (req: any, res) => {
+  app.get("/api/profile", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const profile = await storage.getUserProfile(userId);
@@ -41,23 +43,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/profile', isAuthenticated, async (req: any, res) => {
+  app.post("/api/profile", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const profileData = insertUserProfileSchema.parse({
         ...req.body,
-        userId
+        userId,
       });
-      
+
       const existingProfile = await storage.getUserProfile(userId);
       let profile;
-      
+
       if (existingProfile) {
         profile = await storage.updateUserProfile(userId, profileData);
       } else {
         profile = await storage.createUserProfile(profileData);
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error creating/updating profile:", error);
@@ -66,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Room listing routes
-  app.get('/api/listings', async (req, res) => {
+  app.get("/api/listings", async (req, res) => {
     try {
       const { location, budgetMin, budgetMax, userType } = req.query;
       const filters = {
@@ -75,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         budgetMax: budgetMax ? parseInt(budgetMax as string) : undefined,
         userType: userType as string,
       };
-      
+
       const listings = await storage.getRoomListings(filters);
       res.json(listings);
     } catch (error) {
@@ -84,15 +86,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/listings/:id', async (req, res) => {
+  app.get("/api/listings/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const listing = await storage.getRoomListing(id);
-      
+
       if (!listing) {
         return res.status(404).json({ message: "Listing not found" });
       }
-      
+
       res.json(listing);
     } catch (error) {
       console.error("Error fetching listing:", error);
@@ -100,14 +102,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/listings', isAuthenticated, async (req: any, res) => {
+  app.post("/api/listings", isAuthenticated, async (req: any, res) => {
     try {
       const ownerId = req.user.claims.sub;
       const listingData = insertRoomListingSchema.parse({
         ...req.body,
-        ownerId
+        ownerId,
       });
-      
+
       const listing = await storage.createRoomListing(listingData);
       res.json(listing);
     } catch (error) {
@@ -116,17 +118,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+  app.put("/api/listings/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      
+
       // Verify ownership
       const listing = await storage.getRoomListing(id);
       if (!listing || listing.ownerId !== userId) {
         return res.status(403).json({ message: "Not authorized" });
       }
-      
+
       const updatedListing = await storage.updateRoomListing(id, req.body);
       res.json(updatedListing);
     } catch (error) {
@@ -135,17 +137,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+  app.delete("/api/listings/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      
+
       // Verify ownership
       const listing = await storage.getRoomListing(id);
       if (!listing || listing.ownerId !== userId) {
         return res.status(403).json({ message: "Not authorized" });
       }
-      
+
       await storage.deleteRoomListing(id);
       res.json({ message: "Listing deleted successfully" });
     } catch (error) {
@@ -155,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Message routes
-  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
+  app.get("/api/conversations", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const conversations = await storage.getConversations(userId);
@@ -166,26 +168,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages/:partnerId', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const partnerId = req.params.partnerId;
-      const messages = await storage.getMessages(userId, partnerId);
-      res.json(messages);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).json({ message: "Failed to fetch messages" });
+  app.get(
+    "/api/messages/:partnerId",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const partnerId = req.params.partnerId;
+        const messages = await storage.getMessages(userId, partnerId);
+        res.json(messages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ message: "Failed to fetch messages" });
+      }
     }
-  });
+  );
 
-  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+  app.post("/api/messages", isAuthenticated, async (req: any, res) => {
     try {
       const senderId = req.user.claims.sub;
       const messageData = insertMessageSchema.parse({
         ...req.body,
-        senderId
+        senderId,
       });
-      
+
       const message = await storage.createMessage(messageData);
       res.json(message);
     } catch (error) {
@@ -194,20 +200,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/messages/read/:partnerId', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const partnerId = req.params.partnerId;
-      await storage.markMessagesAsRead(partnerId, userId);
-      res.json({ message: "Messages marked as read" });
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-      res.status(500).json({ message: "Failed to mark messages as read" });
+  app.put(
+    "/api/messages/read/:partnerId",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const partnerId = req.params.partnerId;
+        await storage.markMessagesAsRead(partnerId, userId);
+        res.json({ message: "Messages marked as read" });
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+        res.status(500).json({ message: "Failed to mark messages as read" });
+      }
     }
-  });
+  );
 
   // Match routes
-  app.get('/api/matches', isAuthenticated, async (req: any, res) => {
+  app.get("/api/matches", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const matches = await storage.getMatches(userId);
@@ -218,28 +228,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/matches', isAuthenticated, async (req: any, res) => {
+  app.post("/api/matches", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { targetUserId, listingId } = req.body;
-      
+
       // Calculate compatibility score
       const userProfile = await storage.getUserProfile(userId);
       const targetProfile = await storage.getUserProfile(targetUserId);
-      
+
       if (!userProfile || !targetProfile) {
         return res.status(400).json({ message: "Profiles not found" });
       }
-      
-      const compatibilityScore = calculateCompatibilityScore(userProfile, targetProfile);
-      
+
+      const compatibilityScore = calculateCompatibilityScore(
+        userProfile,
+        targetProfile
+      );
+
       const matchData = insertMatchSchema.parse({
-        seekerId: userProfile.userType === 'room_seeker' ? userId : targetUserId,
-        ownerId: userProfile.userType === 'room_owner' ? userId : targetUserId,
+        seekerId:
+          userProfile.userType === "room_seeker" ? userId : targetUserId,
+        ownerId: userProfile.userType === "room_owner" ? userId : targetUserId,
         listingId,
         compatibilityScore: compatibilityScore.toString(),
       });
-      
+
       const match = await storage.createMatch(matchData);
       res.json(match);
     } catch (error) {
@@ -248,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/matches/:id', isAuthenticated, async (req: any, res) => {
+  app.put("/api/matches/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -261,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Favorite routes
-  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
+  app.get("/api/favorites", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const favorites = await storage.getFavorites(userId);
@@ -272,14 +286,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
+  app.post("/api/favorites", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const favoriteData = insertFavoriteSchema.parse({
         ...req.body,
-        userId
+        userId,
       });
-      
+
       const favorite = await storage.addFavorite(favoriteData);
       res.json(favorite);
     } catch (error) {
@@ -288,20 +302,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/favorites/:listingId', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const listingId = parseInt(req.params.listingId);
-      await storage.removeFavorite(userId, listingId);
-      res.json({ message: "Favorite removed successfully" });
-    } catch (error) {
-      console.error("Error removing favorite:", error);
-      res.status(500).json({ message: "Failed to remove favorite" });
+  app.delete(
+    "/api/favorites/:listingId",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const listingId = parseInt(req.params.listingId);
+        await storage.removeFavorite(userId, listingId);
+        res.json({ message: "Favorite removed successfully" });
+      } catch (error) {
+        console.error("Error removing favorite:", error);
+        res.status(500).json({ message: "Failed to remove favorite" });
+      }
     }
-  });
+  );
 
   // Admin routes
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  app.get("/api/admin/users", isAuthenticated, async (req: any, res) => {
     try {
       // TODO: Add admin role check
       const users = await storage.getAllUsers();
@@ -312,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+  app.get("/api/admin/analytics", isAuthenticated, async (req: any, res) => {
     try {
       // TODO: Add admin role check
       const analytics = await storage.getAnalytics();
@@ -323,31 +341,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/export', isAuthenticated, async (req: any, res) => {
+  app.get("/api/admin/export", isAuthenticated, async (req: any, res) => {
     try {
       // TODO: Add admin role check
       const { type } = req.query;
       let data;
-      
+
       switch (type) {
-        case 'users':
+        case "users":
           data = await storage.getAllUsers();
           break;
-        case 'profiles':
+        case "profiles":
           data = await storage.getAllProfiles();
           break;
-        case 'listings':
+        case "listings":
           data = await storage.getAllListings();
           break;
-        case 'messages':
+        case "messages":
           data = await storage.getAllMessages();
           break;
         default:
           return res.status(400).json({ message: "Invalid export type" });
       }
-      
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename=${type}.json`);
+
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename=${type}.json`);
       res.json(data);
     } catch (error) {
       console.error("Error exporting data:", error);
@@ -358,33 +376,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
   // WebSocket server for real-time messaging
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
-  wss.on('connection', (ws: WebSocket, req) => {
-    console.log('WebSocket connection established');
-    
-    ws.on('message', async (data) => {
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws: WebSocket, req) => {
+    console.log("WebSocket connection established");
+
+    ws.on("message", async (data) => {
       try {
         const message = JSON.parse(data.toString());
-        
-        if (message.type === 'new_message') {
+
+        if (message.type === "new_message") {
           // Broadcast message to receiver
           wss.clients.forEach((client) => {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({
-                type: 'message_received',
-                data: message.data
-              }));
+              client.send(
+                JSON.stringify({
+                  type: "message_received",
+                  data: message.data,
+                })
+              );
             }
           });
         }
       } catch (error) {
-        console.error('WebSocket message error:', error);
+        console.error("WebSocket message error:", error);
       }
     });
-    
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
+
+    ws.on("close", () => {
+      console.log("WebSocket connection closed");
     });
   });
 
