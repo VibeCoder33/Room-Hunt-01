@@ -10,10 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, Home, Handshake, DollarSign, Download, UserCog, AlertTriangle, FileText } from "lucide-react";
+import User from "lucide-react/dist/esm/icons/user";
+import Home from "lucide-react/dist/esm/icons/home";
+import Handshake from "lucide-react/dist/esm/icons/handshake";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import UserCog from "lucide-react/dist/esm/icons/user-cog";
+import Download from "lucide-react/dist/esm/icons/download";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import TriangleAlert from "lucide-react/dist/esm/icons/triangle-alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-
 interface Analytics {
   totalUsers: number;
   activeListings: number;
@@ -57,11 +63,11 @@ export default function AdminDashboard() {
       const response = await fetch(`/api/admin/export?type=${type}`, {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error("Export failed");
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -71,7 +77,7 @@ export default function AdminDashboard() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Success",
         description: `${type} data exported successfully`,
@@ -120,7 +126,9 @@ export default function AdminDashboard() {
       case "Completed":
         return <Badge className="bg-green-100 text-green-800">Active</Badge>;
       case "Pending Review":
-        return <Badge className="bg-blue-100 text-blue-800">Pending Review</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800">Pending Review</Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -131,7 +139,9 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
-        <p className="text-xl text-gray-600 mt-2">Comprehensive platform management and analytics</p>
+        <p className="text-xl text-gray-600 mt-2">
+          Comprehensive platform management and analytics
+        </p>
       </div>
 
       {/* Dashboard Stats */}
@@ -140,7 +150,7 @@ export default function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
+                <User className="w-6 h-6 text-primary" />
               </div>
               <div className="ml-4">
                 <div className="text-2xl font-bold text-gray-900">
@@ -213,28 +223,34 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-center py-3 border-b border-gray-100">
               <div>
                 <div className="font-medium">Active Users</div>
-                <div className="text-sm text-gray-600">{users.length} users currently active</div>
+                <div className="text-sm text-gray-600">
+                  {users.length} users currently active
+                </div>
               </div>
               <Button size="sm">View All</Button>
             </div>
-            
+
             <div className="flex justify-between items-center py-3 border-b border-gray-100">
               <div>
                 <div className="font-medium">KYC Pending</div>
-                <div className="text-sm text-gray-600">156 users awaiting verification</div>
+                <div className="text-sm text-gray-600">
+                  156 users awaiting verification
+                </div>
               </div>
               <Button variant="secondary" size="sm">
                 Review
               </Button>
             </div>
-            
+
             <div className="flex justify-between items-center py-3">
               <div>
                 <div className="font-medium">Reported Users</div>
-                <div className="text-sm text-gray-600">23 users flagged for review</div>
+                <div className="text-sm text-gray-600">
+                  23 users flagged for review
+                </div>
               </div>
               <Button variant="destructive" size="sm">
-                <AlertTriangle className="w-4 h-4 mr-1" />
+                <TriangleAlert className="w-4 h-4 mr-1" />
                 Investigate
               </Button>
             </div>
@@ -250,32 +266,29 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              className="w-full" 
-              onClick={() => handleExport("users")}
-            >
+            <Button className="w-full" onClick={() => handleExport("users")}>
               <FileText className="w-4 h-4 mr-2" />
               Export User Data (JSON)
             </Button>
-            
-            <Button 
-              className="w-full bg-secondary hover:bg-secondary/90" 
+
+            <Button
+              className="w-full bg-secondary hover:bg-secondary/90"
               onClick={() => handleExport("listings")}
             >
               <FileText className="w-4 h-4 mr-2" />
               Export Listings Data
             </Button>
-            
-            <Button 
-              className="w-full bg-accent hover:bg-accent/90" 
+
+            <Button
+              className="w-full bg-accent hover:bg-accent/90"
               onClick={() => handleExport("profiles")}
             >
               <FileText className="w-4 h-4 mr-2" />
               Generate Analytics Report
             </Button>
-            
-            <Button 
-              className="w-full bg-gray-600 hover:bg-gray-700" 
+
+            <Button
+              className="w-full bg-gray-600 hover:bg-gray-700"
               onClick={() => handleExport("messages")}
             >
               <FileText className="w-4 h-4 mr-2" />
@@ -316,7 +329,9 @@ export default function AdminDashboard() {
                   </TableCell>
                   <TableCell>{activity.action}</TableCell>
                   <TableCell>{activity.userType}</TableCell>
-                  <TableCell className="text-gray-500">{activity.time}</TableCell>
+                  <TableCell className="text-gray-500">
+                    {activity.time}
+                  </TableCell>
                   <TableCell>{getStatusBadge(activity.status)}</TableCell>
                 </TableRow>
               ))}

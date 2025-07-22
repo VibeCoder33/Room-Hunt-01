@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, MapPin, Heart, Settings } from "lucide-react";
+import { User, MapPin, Heart, Settings2 } from "lucide-react";
 import type { UserProfile, InsertUserProfile } from "@shared/schema";
 
 interface ProfileFormProps {
@@ -416,7 +416,7 @@ export default function ProfileForm({ profile, onSubmit, isLoading }: ProfileFor
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
+                <Settings2 className="w-5 h-5" />
                 Additional Preferences
               </CardTitle>
             </CardHeader>
